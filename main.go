@@ -65,7 +65,9 @@ func main() {
 				continue
 			}
 
-			robot.TotalTransactions++
+			if transactionAmount != 0 {
+				robot.TotalTransactions++
+			}
 			robot.TotalChineseAmount += float64(transactionAmount)
 			beforeDeductionUsdt := float64(transactionAmount) / 8.5
 			// Calculate due amount based on the provided information
@@ -80,11 +82,14 @@ func main() {
 
 			currentTime := time.Now().Format("15:04")
 
-			if appendingString == "" {
-				appendingString = currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "USDT\n"
-			} else {
-				appendingString += " " + currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "USDT\n"
+			if transactionAmount != 0 {
+				if appendingString == "" {
+					appendingString = currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "USDT\n"
+				} else {
 
+					appendingString += " " + currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "USDT\n"
+
+				}
 			}
 			lineOfDashes := strings.Repeat("-", 50)
 
