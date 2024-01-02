@@ -344,9 +344,13 @@ import (
 )
 
 type Robot struct {
-	TotalTransactions int
-	TotalPayments     int
-	ExchangeRate      float64
+	TotalTransactions  int
+	TotalChineseAmount int
+	TotalPayments      int
+	PaidAmount         float64
+	DueAmount          float64
+	DueAmountUsdt      float64
+	ExchangeRate       float64
 }
 
 func main() {
@@ -378,21 +382,6 @@ func main() {
 		} else if strings.Contains(update.Message.Text, "Set exchange rate Chinese Yuan/ USDT at 8.5") {
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "Already set exchange rate at 8.5")
 			bot.Send(reply)
-		} else if strings.Contains(update.Message.Text, "New transaction") {
-			// Create an inline keyboard with a button for the user to input the amount
-			inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
-				tgbotapi.NewInlineKeyboardRow(
-					tgbotapi.NewInlineKeyboardButtonData("Enter amount", "enter_amount"),
-				),
-			)
-
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Click the button to enter the transaction amount:")
-			msg.ReplyMarkup = inlineKeyboard
-			bot.Send(msg)
-		} else if update.CallbackQuery != nil && update.CallbackQuery.Data == "enter_amount" {
-			// Respond to the callback with a message to enter the amount
-			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "Enter the transaction amount:")
-			bot.Send(msg)
 		} else if strings.HasPrefix(update.Message.Text, "+") {
 			amountStr := strings.TrimPrefix(update.Message.Text, "+")
 			transactionAmount, err := strconv.Atoi(amountStr)
@@ -402,19 +391,23 @@ func main() {
 			}
 
 			robot.TotalTransactions++
-			robot.TotalPayments += transactionAmount
+			robot.TotalChineseAmount += transactionAmount
 
 			// Calculate due amount based on the provided information
-			dueAmount := float64(robot.TotalPayments) * robot.ExchangeRate * 0.03
+			afterDecuctionAmount := float64(transactionAmount) * 0.97
+			afterDeductionUsdt := float64(afterDecuctionAmount) / 8.5
 
-			replyText := "Today new transaction(1 slip)\nToday payment(0 slip)\n" +
-				"Total Chinese Yuan:" + strconv.Itoa(robot.TotalPayments) + "\n" +
+			robot.DueAmount += afterDecuctionAmount
+			robot.DueAmountUsdt += afterDeductionUsdt
+
+			replyText := "Today new transaction(" + strconv.Itoa(robot.TotalTransactions) + " slip)\nToday payment(" + strconv.Itoa(robot.TotalPayments) + " slip)\n" +
+				"Total Chinese Yuan:" + strconv.Itoa(robot.TotalChineseAmount) + "\n" +
 				"Exchange rate:8.5000\nPer-transaction fee rate:3%\n" +
-				"Total Payment: " + strconv.FormatFloat(dueAmount, 'f', 2, 64) + " Yuan | " +
-				strconv.FormatFloat((dueAmount/robot.ExchangeRate), 'f', 2, 64) + " USDT\n" +
+				"Total Payment: " + strconv.FormatFloat(afterDecuctionAmount, 'f', 2, 64) + " Yuan | " +
+				strconv.FormatFloat((afterDeductionUsdt), 'f', 2, 64) + " USDT\n" +
 				"Paid amount: 0 Yuan | 0 USDT\n" +
-				"Due amount: " + strconv.FormatFloat(dueAmount, 'f', 2, 64) + " Yuan | " +
-				strconv.FormatFloat((dueAmount/robot.ExchangeRate), 'f', 2, 64) + " USDT"
+				"Due amount: " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
+				strconv.FormatFloat(robot.DueAmountUsdt, 'f', 2, 64) + " USDT"
 
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 			bot.Send(reply)
