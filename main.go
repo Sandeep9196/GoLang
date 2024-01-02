@@ -10,13 +10,18 @@ import (
 )
 
 type Robot struct {
-	TotalTransactions  int
-	TotalChineseAmount int
-	TotalPayments      int
-	PaidAmount         float64
-	DueAmount          float64
-	DueAmountUsdt      float64
-	ExchangeRate       float64
+	TotalTransactions   int
+	TotalChineseAmount  float64
+	TotalPayments       int
+	afterDeduction      float64
+	afterDeductionUsdt  float64
+	TotalPaidAmount     float64
+	TotalPaidAmountUsdt float64
+	PaidAmount          float64
+	PaidAmountUsdt      float64
+	DueAmount           float64
+	DueAmountUsdt       float64
+	ExchangeRate        float64
 }
 
 func main() {
@@ -53,38 +58,41 @@ func main() {
 			bot.Send(reply)
 		} else if strings.HasPrefix(update.Message.Text, "+") {
 			amountStr := strings.TrimPrefix(update.Message.Text, "+")
-			transactionAmount, err := strconv.Atoi(amountStr)
+			transactionAmount, err := strconv.ParseFloat(amountStr, 64)
 			if err != nil {
 				log.Println("Error parsing transaction amount:", err)
 				continue
 			}
 
 			robot.TotalTransactions++
-			robot.TotalChineseAmount += transactionAmount
+			robot.TotalChineseAmount += float64(transactionAmount)
 			beforeDeductionUsdt := float64(transactionAmount) / 8.5
 			// Calculate due amount based on the provided information
-			afterDecuctionAmount := float64(transactionAmount) * 0.97
-			afterDeductionUsdt := float64(afterDecuctionAmount) / 8.5
-
-			robot.DueAmount += afterDecuctionAmount
+			afterDeductionAmount := float64(transactionAmount) * 0.97
+			afterDeductionUsdt := float64(afterDeductionAmount) / 8.5
+			robot.TotalPaidAmount += afterDeductionAmount
+			robot.TotalPaidAmountUsdt += afterDeductionUsdt
+			robot.DueAmount += afterDeductionAmount
 			robot.DueAmountUsdt += afterDeductionUsdt
+			robot.afterDeduction = afterDeductionAmount
+			robot.afterDeductionUsdt = afterDeductionUsdt
 
 			currentTime := time.Now().Format("15:04")
 
 			if appendingString == "" {
-				appendingString = currentTime + "   " + strconv.Itoa(transactionAmount) + " Yuan/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "USDT\n"
+				appendingString = currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "USDT\n"
 			} else {
-				appendingString += " " + currentTime + "   " + strconv.Itoa(transactionAmount) + " Yuan/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "USDT\n"
+				appendingString += " " + currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "USDT\n"
 
 			}
 			lineOfDashes := strings.Repeat("-", 50)
 
-			replyText := "<b>Today new transaction(" + strconv.Itoa(robot.TotalTransactions) + " slip)</b>\n" + appendingString + lineOfDashes + "\n<b>Today payment(" + strconv.Itoa(robot.TotalPayments) + " slip)</b>\n" + lineOfDashes +
-				"\n<b>Total Chinese Yuan:</b>" + strconv.Itoa(robot.TotalChineseAmount) + "\n" +
+			replyText := "<b>Today new transaction(" + strconv.Itoa(robot.TotalTransactions) + " slip)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>Today payment(" + strconv.Itoa(robot.TotalPayments) + " slip)</b>\n" + lineOfDashes +
+				"\n<b>Total Chinese Yuan:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
 				"<b>Exchange rate:</b>8.5000\n<b>Per-transaction fee rate:</b>3%\n" +
-				"<b>Total Payment:</b> " + strconv.FormatFloat(afterDecuctionAmount, 'f', 2, 64) + " Yuan | " +
-				strconv.FormatFloat((afterDeductionUsdt), 'f', 2, 64) + " USDT\n" + lineOfDashes + "\n" +
-				"<b>Paid amount:</b> 0 Yuan | 0 USDT\n" +
+				"<b>Total Payment:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " Yuan | " +
+				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " USDT\n" + lineOfDashes + "\n" +
+				"<b>Paid amount:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " Yuan | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
 				"<b>Due amount:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
 				strconv.FormatFloat(robot.DueAmountUsdt, 'f', 2, 64) + " USDT"
 
@@ -93,7 +101,7 @@ func main() {
 			bot.Send(reply)
 		} else if strings.HasPrefix(update.Message.Text, "-") {
 			amountStr := strings.TrimPrefix(update.Message.Text, "-")
-			transactionAmount, err := strconv.Atoi(amountStr)
+			transactionAmount, err := strconv.ParseFloat(amountStr, 64)
 			if err != nil {
 				log.Println("Error parsing transaction amount:", err)
 				continue
@@ -102,23 +110,31 @@ func main() {
 			robot.TotalPayments++
 			// Multiply the transaction amount by the exchange rate (8.5)
 			deductedAmount := float64(transactionAmount) * 8.5
-			robot.TotalChineseAmount = int(float64(robot.TotalChineseAmount) - deductedAmount)
+			robot.TotalChineseAmount = float64(robot.TotalChineseAmount) - deductedAmount
 
 			currentTime := time.Now().Format("15:04")
 
 			if appendingPaymentString == "" {
-				appendingPaymentString = currentTime + "   " + strconv.FormatFloat(deductedAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.Itoa(transactionAmount) + "USDT\n"
+				appendingPaymentString = currentTime + "   " + strconv.FormatFloat(deductedAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "USDT\n"
 			} else {
-				appendingPaymentString += currentTime + "   " + strconv.FormatFloat(deductedAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.Itoa(transactionAmount) + "USDT\n"
+				appendingPaymentString += currentTime + "   " + strconv.FormatFloat(deductedAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "USDT\n"
 
 			}
 			lineOfDashes := strings.Repeat("-", 50)
 
-			replyText := "<b>Today new transaction(" + strconv.Itoa(robot.TotalTransactions) + " slip)</b>\n" + appendingString + lineOfDashes + "\n<b>Today payment(" + strconv.Itoa(robot.TotalPayments) + " slip)</b>\n" + lineOfDashes + "\n" + appendingPaymentString +
-				"\n<b>Total Chinese Yuan:</b>" + strconv.Itoa(robot.TotalChineseAmount) + "\n" +
+			PaidUsdt := float64(transactionAmount)
+			PaidAmount := float64(PaidUsdt) * 8.5
+
+			robot.PaidAmount += PaidAmount
+			robot.PaidAmountUsdt += PaidUsdt
+			robot.DueAmount -= PaidAmount
+			robot.DueAmountUsdt -= PaidUsdt
+
+			replyText := "<b>Today new transaction(" + strconv.Itoa(robot.TotalTransactions) + " slip)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>Today payment(" + strconv.Itoa(robot.TotalPayments) + " slip)</b>\n" + lineOfDashes + "\n" + appendingPaymentString +
+				"\n<b>Total Chinese Yuan:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
 				"<b>Exchange rate:</b>8.5000\n<b>Per-transaction fee rate:</b>3%\n" +
-				"<b>Total Payment:</b>  Yuan |  0 USDT\n" + lineOfDashes + "\n" +
-				"<b>Paid amount:</b> 0 Yuan | 0 USDT\n" +
+				"<b>Total Payment:</b>" + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + "  Yuan |  " + strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " USDT\n" + lineOfDashes + "\n" +
+				"<b>Paid amount:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " Yuan | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
 				"<b>Due amount:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
 				strconv.FormatFloat(robot.DueAmountUsdt, 'f', 2, 64) + " USDT"
 
