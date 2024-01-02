@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -89,12 +90,12 @@ func main() {
 
 			replyText := "<b>Today new transaction(" + strconv.Itoa(robot.TotalTransactions) + " slip)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>Today payment(" + strconv.Itoa(robot.TotalPayments) + " slip)</b>\n" + lineOfDashes +
 				"\n<b>Total Chinese Yuan:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
-				"<b>Exchange rate:</b>8.5000\n<b>Per-transaction fee rate:</b>3%\n" +
+				"<b>Exchange rate:</b>8.5000\n<b>Per-transaction fee rate:</b>3%\n" + lineOfDashes + "\n" +
 				"<b>Total Payment:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " Yuan | " +
-				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " USDT\n" + lineOfDashes + "\n" +
+				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
 				"<b>Paid amount:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " Yuan | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
 				"<b>Due amount:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
-				strconv.FormatFloat(robot.DueAmountUsdt, 'f', 2, 64) + " USDT"
+				strconv.FormatFloat(math.Abs(robot.DueAmountUsdt), 'f', 2, 64) + " USDT"
 
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 			reply.ParseMode = tgbotapi.ModeHTML
@@ -130,11 +131,11 @@ func main() {
 
 			replyText := "<b>Today new transaction(" + strconv.Itoa(robot.TotalTransactions) + " slip)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>Today payment(" + strconv.Itoa(robot.TotalPayments) + " slip)</b>\n" + lineOfDashes + "\n" + appendingPaymentString +
 				"\n<b>Total Chinese Yuan:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
-				"<b>Exchange rate:</b>8.5000\n<b>Per-transaction fee rate:</b>3%\n" +
-				"<b>Total Payment:</b>" + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + "  Yuan |  " + strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " USDT\n" + lineOfDashes + "\n" +
+				"<b>Exchange rate:</b>8.5000\n<b>Per-transaction fee rate:</b>3%\n" + lineOfDashes + "\n" +
+				"<b>Total Payment:</b>" + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + "  Yuan |  " + strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
 				"<b>Paid amount:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " Yuan | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
 				"<b>Due amount:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
-				strconv.FormatFloat(robot.DueAmountUsdt, 'f', 2, 64) + " USDT"
+				strconv.FormatFloat(math.Abs(robot.DueAmountUsdt), 'f', 2, 64) + " USDT"
 
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 			reply.ParseMode = tgbotapi.ModeHTML
