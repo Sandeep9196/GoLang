@@ -339,6 +339,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -367,7 +368,7 @@ func main() {
 	robot := &Robot{
 		ExchangeRate: 8.5,
 	}
-
+	appendingString := ""
 	for update := range updates {
 		if update.Message == nil {
 			continue
@@ -392,7 +393,7 @@ func main() {
 
 			robot.TotalTransactions++
 			robot.TotalChineseAmount += transactionAmount
-
+			beforeDeductionUsdt := float64(transactionAmount) / 8.5
 			// Calculate due amount based on the provided information
 			afterDecuctionAmount := float64(transactionAmount) * 0.97
 			afterDeductionUsdt := float64(afterDecuctionAmount) / 8.5
@@ -400,7 +401,15 @@ func main() {
 			robot.DueAmount += afterDecuctionAmount
 			robot.DueAmountUsdt += afterDeductionUsdt
 
-			replyText := "Today new transaction(" + strconv.Itoa(robot.TotalTransactions) + " slip)\nToday payment(" + strconv.Itoa(robot.TotalPayments) + " slip)\n" +
+			currentTime := time.Now().Format("15:04")
+
+			if appendingString == "" {
+				appendingString = currentTime + "   " + strconv.Itoa(transactionAmount) + " Yuan/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "USDT\n"
+			} else {
+				appendingString += currentTime + "   " + strconv.Itoa(transactionAmount) + " Yuan/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "USDT\n"
+
+			}
+			replyText := "Today new transaction(" + strconv.Itoa(robot.TotalTransactions) + " slip)\n " + appendingString + "\nToday payment(" + strconv.Itoa(robot.TotalPayments) + " slip)\n" +
 				"Total Chinese Yuan:" + strconv.Itoa(robot.TotalChineseAmount) + "\n" +
 				"Exchange rate:8.5000\nPer-transaction fee rate:3%\n" +
 				"Total Payment: " + strconv.FormatFloat(afterDecuctionAmount, 'f', 2, 64) + " Yuan | " +
