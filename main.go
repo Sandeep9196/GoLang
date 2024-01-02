@@ -110,7 +110,6 @@ func main() {
 			robot.TotalPayments++
 			// Multiply the transaction amount by the exchange rate (8.5)
 			deductedAmount := float64(transactionAmount) * 8.5
-			robot.TotalChineseAmount = float64(robot.TotalChineseAmount) - deductedAmount
 
 			currentTime := time.Now().Format("15:04")
 
