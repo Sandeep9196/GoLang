@@ -109,14 +109,13 @@ func main() {
 
 			robot.TotalPayments++
 			// Multiply the transaction amount by the exchange rate (8.5)
-			deductedAmount := float64(transactionAmount) * 8.5
 
 			currentTime := time.Now().Format("15:04")
 
 			if appendingPaymentString == "" {
-				appendingPaymentString = currentTime + "   " + strconv.FormatFloat(deductedAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "USDT\n"
+				appendingPaymentString = currentTime + " " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "USDT\n"
 			} else {
-				appendingPaymentString += currentTime + "   " + strconv.FormatFloat(deductedAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "USDT\n"
+				appendingPaymentString += currentTime + " " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "USDT\n"
 
 			}
 			lineOfDashes := strings.Repeat("-", 50)
