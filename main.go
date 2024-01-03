@@ -26,7 +26,7 @@ type Robot struct {
 }
 
 func main() {
-	bot, err := tgbotapi.NewBotAPI("6799495599:AAHjy1PJkUnBj41eudMqQ1hD58QsqIqYw4M")
+	bot, err := tgbotapi.NewBotAPI("6654622790:AAGgV-mwffMfHw81MRwzCC9060Xb1NwKWGQ")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -67,12 +67,25 @@ func main() {
 
 			if transactionAmount != 0 {
 				robot.TotalTransactions++
+			} else {
+				robot.TotalTransactions = 0
+				robot.TotalChineseAmount = 0
+				robot.TotalPayments = 0
+				robot.afterDeduction = 0
+				robot.afterDeductionUsdt = 0
+				robot.TotalPaidAmount = 0
+				robot.TotalPaidAmountUsdt = 0
+				robot.PaidAmount = 0
+				robot.PaidAmountUsdt = 0
+				robot.DueAmount = 0
+				robot.DueAmountUsdt = 0
+
 			}
 			robot.TotalChineseAmount += float64(transactionAmount)
-			beforeDeductionUsdt := float64(transactionAmount) / 8.5
+			beforeDeductionUsdt := float64(transactionAmount) / robot.ExchangeRate
 			// Calculate due amount based on the provided information
 			afterDeductionAmount := float64(transactionAmount) * 0.97
-			afterDeductionUsdt := float64(afterDeductionAmount) / 8.5
+			afterDeductionUsdt := float64(afterDeductionAmount) / robot.ExchangeRate
 			robot.TotalPaidAmount += afterDeductionAmount
 			robot.TotalPaidAmountUsdt += afterDeductionUsdt
 			robot.DueAmount += afterDeductionAmount
@@ -84,18 +97,20 @@ func main() {
 
 			if transactionAmount != 0 {
 				if appendingString == "" {
-					appendingString = currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "U\n"
+					appendingString = currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "/" + strconv.FormatFloat(robot.ExchangeRate, 'f', 2, 64) + "=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "U\n"
 				} else {
 
-					appendingString += " " + currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "U\n"
+					appendingString += " " + currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "/" + strconv.FormatFloat(robot.ExchangeRate, 'f', 2, 64) + "=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "U\n"
 
 				}
+			} else {
+				appendingString = ""
 			}
 			lineOfDashes := strings.Repeat("-", 50)
 
 			replyText := "<b>今日入款(" + strconv.Itoa(robot.TotalTransactions) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>今日下发(" + strconv.Itoa(robot.TotalPayments) + " 笔)</b>\n" + lineOfDashes +
 				"\n<b>总入款:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
-				"<b>汇率:</b>8.5000\n<b>交易费率:</b>3%\n" + lineOfDashes + "\n" +
+				"<b>汇率:</b>" + strconv.FormatFloat(robot.ExchangeRate, 'f', 2, 64) + "\n<b>交易费率:</b>3%\n" + lineOfDashes + "\n" +
 				"<b>应下发:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " | " +
 				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " U\n" +
 				"<b>已下发:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " U\n" +
@@ -127,7 +142,7 @@ func main() {
 			lineOfDashes := strings.Repeat("-", 50)
 
 			PaidUsdt := float64(transactionAmount)
-			PaidAmount := float64(PaidUsdt) * 8.5
+			PaidAmount := float64(PaidUsdt) * robot.ExchangeRate
 
 			robot.PaidAmount += PaidAmount
 			robot.PaidAmountUsdt += PaidUsdt
@@ -144,12 +159,27 @@ func main() {
 
 			replyText := "<b>今日入款(" + strconv.Itoa(robot.TotalTransactions) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>今日下发(" + strconv.Itoa(robot.TotalPayments) + " 笔)</b>\n" + lineOfDashes +
 				"\n<b>总入款:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
-				"<b>汇率:</b>8.5000\n<b>交易费率:</b>3%\n" + lineOfDashes + "\n" +
+				"<b>汇率:</b>" + strconv.FormatFloat(robot.ExchangeRate, 'f', 2, 64) + "\n<b>交易费率:</b>3%\n" + lineOfDashes + "\n" +
 				"<b>应下发:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " | " +
 				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " U\n" +
 				"<b>已下发:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " U\n" +
 				"<b>未下发:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " | " +
 				strconv.FormatFloat(math.Abs(robot.DueAmountUsdt), 'f', 2, 64) + " U"
+
+			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
+			reply.ParseMode = tgbotapi.ModeHTML
+			bot.Send(reply)
+		} else if strings.HasPrefix(update.Message.Text, "设置动态汇率") {
+
+			trimRate := strings.TrimPrefix(update.Message.Text, "设置动态汇率")
+			dynamicExchangeRate, err := strconv.ParseFloat(trimRate, 64)
+			if err != nil {
+				log.Println("Error parsing dynamic exchange rate:", err)
+				continue
+			}
+
+			robot.ExchangeRate = dynamicExchangeRate
+			replyText := "汇率更新为 " + trimRate
 
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 			reply.ParseMode = tgbotapi.ModeHTML
