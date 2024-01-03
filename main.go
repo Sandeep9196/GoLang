@@ -26,7 +26,7 @@ type Robot struct {
 }
 
 func main() {
-	bot, err := tgbotapi.NewBotAPI("6603083264:AAEmOV1kIuNWYIxgIrj5kye7NfsgP-Ud2m8")
+	bot, err := tgbotapi.NewBotAPI("6799495599:AAHjy1PJkUnBj41eudMqQ1hD58QsqIqYw4M")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,14 +48,14 @@ func main() {
 			continue
 		}
 
-		if strings.Contains(update.Message.Text, "Ready to keep records now!") {
-			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "Robot is here now for you.")
+		if strings.Contains(update.Message.Text, "开始") {
+			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "机器人已开启，请开始记账。")
 			bot.Send(reply)
-		} else if strings.Contains(update.Message.Text, "Please prepare new finance sheet!") {
-			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "New finance sheet is done.")
+		} else if strings.Contains(update.Message.Text, "清除今日账单") {
+			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "今日账单已清除，可重新开始记录")
 			bot.Send(reply)
-		} else if strings.Contains(update.Message.Text, "Set exchange rate Chinese Yuan/ USDT at 8.5") {
-			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "Already set exchange rate at 8.5")
+		} else if strings.Contains(update.Message.Text, "设置汇率8.5") {
+			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "固定汇率设置成功， 当前固定汇率为8.5")
 			bot.Send(reply)
 		} else if strings.HasPrefix(update.Message.Text, "+") {
 			amountStr := strings.TrimPrefix(update.Message.Text, "+")
@@ -93,13 +93,13 @@ func main() {
 			}
 			lineOfDashes := strings.Repeat("-", 50)
 
-			replyText := "<b>Today new transaction(" + strconv.Itoa(robot.TotalTransactions) + " slip)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>Today payment(" + strconv.Itoa(robot.TotalPayments) + " slip)</b>\n" + lineOfDashes +
-				"\n<b>Total Chinese Yuan:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
-				"<b>Exchange rate:</b>8.5000\n<b>Per-transaction fee rate:</b>3%\n" + lineOfDashes + "\n" +
-				"<b>Total Payment:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " Yuan | " +
+			replyText := "<b>今日入款(" + strconv.Itoa(robot.TotalTransactions) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>今日下发(" + strconv.Itoa(robot.TotalPayments) + " 笔)</b>\n" + lineOfDashes +
+				"\n<b>总入款:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
+				"<b>汇率:</b>8.5000\n<b>交易费率:</b>3%\n" + lineOfDashes + "\n" +
+				"<b>应下发:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " Yuan | " +
 				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
-				"<b>Paid amount:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " Yuan | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
-				"<b>Due amount:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
+				"<b>已下发:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " Yuan | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
+				"<b>未下发:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
 				strconv.FormatFloat(math.Abs(robot.DueAmountUsdt), 'f', 2, 64) + " USDT"
 
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
@@ -134,12 +134,21 @@ func main() {
 			robot.DueAmount -= PaidAmount
 			robot.DueAmountUsdt -= PaidUsdt
 
-			replyText := "<b>Today new transaction(" + strconv.Itoa(robot.TotalTransactions) + " slip)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>Today payment(" + strconv.Itoa(robot.TotalPayments) + " slip)</b>\n" + lineOfDashes + "\n" + appendingPaymentString +
-				"\n<b>Total Chinese Yuan:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
-				"<b>Exchange rate:</b>8.5000\n<b>Per-transaction fee rate:</b>3%\n" + lineOfDashes + "\n" +
-				"<b>Total Payment:</b>" + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + "  Yuan |  " + strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
-				"<b>Paid amount:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " Yuan | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
-				"<b>Due amount:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
+			// replyText := "<b>Today new transaction(" + strconv.Itoa(robot.TotalTransactions) + " slip)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>Today payment(" + strconv.Itoa(robot.TotalPayments) + " slip)</b>\n" + lineOfDashes + "\n" + appendingPaymentString +
+			// 	"\n<b>Total Chinese Yuan:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
+			// 	"<b>Exchange rate:</b>8.5000\n<b>Per-transaction fee rate:</b>3%\n" + lineOfDashes + "\n" +
+			// 	"<b>Total Payment:</b>" + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + "  Yuan |  " + strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
+			// 	"<b>Paid amount:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " Yuan | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
+			// 	"<b>Due amount:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
+			// 	strconv.FormatFloat(math.Abs(robot.DueAmountUsdt), 'f', 2, 64) + " USDT"
+
+			replyText := "<b>今日入款(" + strconv.Itoa(robot.TotalTransactions) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>今日下发(" + strconv.Itoa(robot.TotalPayments) + " 笔)</b>\n" + lineOfDashes +
+				"\n<b>总入款:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
+				"<b>汇率:</b>8.5000\n<b>交易费率:</b>3%\n" + lineOfDashes + "\n" +
+				"<b>应下发:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " Yuan | " +
+				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
+				"<b>已下发:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " Yuan | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
+				"<b>未下发:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
 				strconv.FormatFloat(math.Abs(robot.DueAmountUsdt), 'f', 2, 64) + " USDT"
 
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
