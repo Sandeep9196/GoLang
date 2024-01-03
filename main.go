@@ -84,10 +84,10 @@ func main() {
 
 			if transactionAmount != 0 {
 				if appendingString == "" {
-					appendingString = currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "USDT\n"
+					appendingString = currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "U\n"
 				} else {
 
-					appendingString += " " + currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + " Yuan/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "USDT\n"
+					appendingString += " " + currentTime + "   " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "/8.5=" + strconv.FormatFloat(beforeDeductionUsdt, 'f', 2, 64) + "U\n"
 
 				}
 			}
@@ -96,11 +96,11 @@ func main() {
 			replyText := "<b>今日入款(" + strconv.Itoa(robot.TotalTransactions) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>今日下发(" + strconv.Itoa(robot.TotalPayments) + " 笔)</b>\n" + lineOfDashes +
 				"\n<b>总入款:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
 				"<b>汇率:</b>8.5000\n<b>交易费率:</b>3%\n" + lineOfDashes + "\n" +
-				"<b>应下发:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " Yuan | " +
-				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
-				"<b>已下发:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " Yuan | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
-				"<b>未下发:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
-				strconv.FormatFloat(math.Abs(robot.DueAmountUsdt), 'f', 2, 64) + " USDT"
+				"<b>应下发:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " | " +
+				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " U\n" +
+				"<b>已下发:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " U\n" +
+				"<b>未下发:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " | " +
+				strconv.FormatFloat(math.Abs(robot.DueAmountUsdt), 'f', 2, 64) + " U"
 
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 			reply.ParseMode = tgbotapi.ModeHTML
@@ -119,9 +119,9 @@ func main() {
 			currentTime := time.Now().Format("15:04")
 
 			if appendingPaymentString == "" {
-				appendingPaymentString = currentTime + " " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "USDT\n"
+				appendingPaymentString = currentTime + " " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "U\n"
 			} else {
-				appendingPaymentString += currentTime + " " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "USDT\n"
+				appendingPaymentString += currentTime + " " + strconv.FormatFloat(transactionAmount, 'f', 2, 64) + "U\n"
 
 			}
 			lineOfDashes := strings.Repeat("-", 50)
@@ -145,11 +145,11 @@ func main() {
 			replyText := "<b>今日入款(" + strconv.Itoa(robot.TotalTransactions) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>今日下发(" + strconv.Itoa(robot.TotalPayments) + " 笔)</b>\n" + lineOfDashes +
 				"\n<b>总入款:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
 				"<b>汇率:</b>8.5000\n<b>交易费率:</b>3%\n" + lineOfDashes + "\n" +
-				"<b>应下发:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " Yuan | " +
-				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
-				"<b>已下发:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " Yuan | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " USDT\n" +
-				"<b>未下发:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
-				strconv.FormatFloat(math.Abs(robot.DueAmountUsdt), 'f', 2, 64) + " USDT"
+				"<b>应下发:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " | " +
+				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " U\n" +
+				"<b>已下发:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " U\n" +
+				"<b>未下发:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " | " +
+				strconv.FormatFloat(math.Abs(robot.DueAmountUsdt), 'f', 2, 64) + " U"
 
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 			reply.ParseMode = tgbotapi.ModeHTML
