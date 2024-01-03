@@ -157,7 +157,7 @@ func main() {
 			// 	"<b>Due amount:</b> " + strconv.FormatFloat(robot.DueAmount, 'f', 2, 64) + " Yuan | " +
 			// 	strconv.FormatFloat(math.Abs(robot.DueAmountUsdt), 'f', 2, 64) + " USDT"
 
-			replyText := "<b>今日入款(" + strconv.Itoa(robot.TotalTransactions) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>今日下发(" + strconv.Itoa(robot.TotalPayments) + " 笔)</b>\n" + lineOfDashes +
+			replyText := "<b>今日入款(" + strconv.Itoa(robot.TotalTransactions) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>今日下发(" + strconv.Itoa(robot.TotalPayments) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingPaymentString +
 				"\n<b>总入款:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
 				"<b>汇率:</b>" + strconv.FormatFloat(robot.ExchangeRate, 'f', 2, 64) + "\n<b>交易费率:</b>3%\n" + lineOfDashes + "\n" +
 				"<b>应下发:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " | " +
