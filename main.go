@@ -26,7 +26,8 @@ type Robot struct {
 }
 
 func main() {
-	bot, err := tgbotapi.NewBotAPI("6654622790:AAGgV-mwffMfHw81MRwzCC9060Xb1NwKWGQ")
+	bot, err := tgbotapi.NewBotAPI("6799495599:AAHjy1PJkUnBj41eudMqQ1hD58QsqIqYw4M")
+
 	if err != nil {
 		log.Fatal(err)
 	}
