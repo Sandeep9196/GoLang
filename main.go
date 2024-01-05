@@ -24,6 +24,7 @@ type Robot struct {
 	DueAmountUsdt         float64
 	ExchangeRate          float64
 	PerTransactionFeeRate float64
+	TransactionRate       float64
 }
 
 func main() {
@@ -41,6 +42,7 @@ func main() {
 	robot := &Robot{
 		ExchangeRate:          6.8,
 		PerTransactionFeeRate: 0.97, // Default fee rate (3%)
+		TransactionRate:       3,
 	}
 	appendingString := ""
 	appendingPaymentString := ""
@@ -113,7 +115,7 @@ func main() {
 
 			replyText := "<b>今日入款(" + strconv.Itoa(robot.TotalTransactions) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>今日下发(" + strconv.Itoa(robot.TotalPayments) + " 笔)</b>\n" + lineOfDashes +
 				"\n<b>总入款:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
-				"<b>汇率:</b>" + strconv.FormatFloat(robot.ExchangeRate, 'f', 2, 64) + "\n<b>交易费率:</b>3%\n" + lineOfDashes + "\n" +
+				"<b>汇率:</b>" + strconv.FormatFloat(robot.ExchangeRate, 'f', 2, 64) + "\n<b>交易费率:</b>" + strconv.FormatFloat(robot.TransactionRate, 'f', 2, 64) + "%\n" + lineOfDashes + "\n" +
 				"<b>应下发:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " | " +
 				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " U\n" +
 				"<b>已下发:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " U\n" +
@@ -162,7 +164,7 @@ func main() {
 
 			replyText := "<b>今日入款(" + strconv.Itoa(robot.TotalTransactions) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>今日下发(" + strconv.Itoa(robot.TotalPayments) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingPaymentString +
 				"\n<b>总入款:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
-				"<b>汇率:</b>" + strconv.FormatFloat(robot.ExchangeRate, 'f', 2, 64) + "\n<b>交易费率:</b>3%\n" + lineOfDashes + "\n" +
+				"<b>汇率:</b>" + strconv.FormatFloat(robot.ExchangeRate, 'f', 2, 64) + "\n<b>交易费率:</b>" + strconv.FormatFloat(robot.TransactionRate, 'f', 2, 64) + "%\n" + lineOfDashes + "\n" +
 				"<b>应下发:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " | " +
 				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " U\n" +
 				"<b>已下发:</b> " + strconv.FormatFloat(robot.PaidAmount, 'f', 2, 64) + " | " + strconv.FormatFloat(robot.PaidAmountUsdt, 'f', 2, 64) + " U\n" +
@@ -189,35 +191,20 @@ func main() {
 			bot.Send(reply)
 		} else if strings.HasPrefix(update.Message.Text, "设置每笔交易费率") {
 			// Extract the fee rate value from the user input
-			parts := strings.Fields(update.Message.Text) // Split the input into parts
-			if len(parts) != 2 {
-				replyText := "请提供有效的费率值，例如：设置每笔交易费率 3%"
-				reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
-				bot.Send(reply)
-				continue
-			}
 
-			trimRate := parts[1]
-
-			// Remove the '%' character
-			trimRate = strings.TrimRight(trimRate, "%")
-
-			// Parse the numeric value
-			dynamicPerTransactionFeeRate, err := strconv.ParseFloat(trimRate, 64)
+			transcationRate := strings.TrimPrefix(update.Message.Text, "设置每笔交易费率")
+			dynamicTransactionRate, err := strconv.ParseFloat(transcationRate, 64)
 			if err != nil {
-				log.Println("Error parsing dynamic per-transaction fee rate:", err)
+				log.Println("Error parsing dynamic exchange rate:", err)
 				continue
 			}
+			robot.TransactionRate = dynamicTransactionRate
+			robot.PerTransactionFeeRate = (100 - dynamicTransactionRate) / 100
 
-			// Convert percentage to decimal (e.g., 3% becomes 0.03)
-			dynamicPerTransactionFeeRate /= 100.0
-
-			robot.PerTransactionFeeRate = dynamicPerTransactionFeeRate
-			replyText := "费率已更新 " + trimRate
-
+			replyText := "请提供有效的费率值，例如：设置每笔交易费率 " + strconv.FormatFloat(robot.TransactionRate, 'f', 2, 64) + "%"
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
-			reply.ParseMode = tgbotapi.ModeHTML
 			bot.Send(reply)
+
 		}
 
 	}
