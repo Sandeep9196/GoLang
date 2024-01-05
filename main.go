@@ -11,18 +11,19 @@ import (
 )
 
 type Robot struct {
-	TotalTransactions   int
-	TotalChineseAmount  float64
-	TotalPayments       int
-	afterDeduction      float64
-	afterDeductionUsdt  float64
-	TotalPaidAmount     float64
-	TotalPaidAmountUsdt float64
-	PaidAmount          float64
-	PaidAmountUsdt      float64
-	DueAmount           float64
-	DueAmountUsdt       float64
-	ExchangeRate        float64
+	TotalTransactions     int
+	TotalChineseAmount    float64
+	TotalPayments         int
+	afterDeduction        float64
+	afterDeductionUsdt    float64
+	TotalPaidAmount       float64
+	TotalPaidAmountUsdt   float64
+	PaidAmount            float64
+	PaidAmountUsdt        float64
+	DueAmount             float64
+	DueAmountUsdt         float64
+	ExchangeRate          float64
+	PerTransactionFeeRate float64
 }
 
 func main() {
@@ -38,7 +39,8 @@ func main() {
 	updates, err := bot.GetUpdatesChan(u)
 
 	robot := &Robot{
-		ExchangeRate: 8.5,
+		ExchangeRate:          6.8,
+		PerTransactionFeeRate: 0.97, // Default fee rate (3%)
 	}
 	appendingString := ""
 	appendingPaymentString := ""
@@ -55,8 +57,8 @@ func main() {
 		} else if strings.Contains(update.Message.Text, "清除今日账单") {
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "今日账单已清除，可重新开始记录")
 			bot.Send(reply)
-		} else if strings.Contains(update.Message.Text, "设置汇率8.5") {
-			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "固定汇率设置成功， 当前固定汇率为8.5")
+		} else if strings.Contains(update.Message.Text, "设置汇率6.8") {
+			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "固定汇率设置成功， 当前固定汇率为6.8")
 			bot.Send(reply)
 		} else if strings.HasPrefix(update.Message.Text, "+") {
 			amountStr := strings.TrimPrefix(update.Message.Text, "+")
@@ -85,7 +87,7 @@ func main() {
 			robot.TotalChineseAmount += float64(transactionAmount)
 			beforeDeductionUsdt := float64(transactionAmount) / robot.ExchangeRate
 			// Calculate due amount based on the provided information
-			afterDeductionAmount := float64(transactionAmount) * 0.97
+			afterDeductionAmount := float64(transactionAmount) * float64(robot.PerTransactionFeeRate)
 			afterDeductionUsdt := float64(afterDeductionAmount) / robot.ExchangeRate
 			robot.TotalPaidAmount += afterDeductionAmount
 			robot.TotalPaidAmountUsdt += afterDeductionUsdt
@@ -170,9 +172,9 @@ func main() {
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 			reply.ParseMode = tgbotapi.ModeHTML
 			bot.Send(reply)
-		} else if strings.HasPrefix(update.Message.Text, "设置动态汇率") {
+		} else if strings.HasPrefix(update.Message.Text, "设置汇率") {
 
-			trimRate := strings.TrimPrefix(update.Message.Text, "设置动态汇率")
+			trimRate := strings.TrimPrefix(update.Message.Text, "设置汇率")
 			dynamicExchangeRate, err := strconv.ParseFloat(trimRate, 64)
 			if err != nil {
 				log.Println("Error parsing dynamic exchange rate:", err)
@@ -185,6 +187,38 @@ func main() {
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 			reply.ParseMode = tgbotapi.ModeHTML
 			bot.Send(reply)
+		} else if strings.HasPrefix(update.Message.Text, "设置每笔交易费率") {
+			// Extract the fee rate value from the user input
+			parts := strings.Fields(update.Message.Text) // Split the input into parts
+			if len(parts) != 2 {
+				replyText := "请提供有效的费率值，例如：设置每笔交易费率 3%"
+				reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
+				bot.Send(reply)
+				continue
+			}
+
+			trimRate := parts[1]
+
+			// Remove the '%' character
+			trimRate = strings.TrimRight(trimRate, "%")
+
+			// Parse the numeric value
+			dynamicPerTransactionFeeRate, err := strconv.ParseFloat(trimRate, 64)
+			if err != nil {
+				log.Println("Error parsing dynamic per-transaction fee rate:", err)
+				continue
+			}
+
+			// Convert percentage to decimal (e.g., 3% becomes 0.03)
+			dynamicPerTransactionFeeRate /= 100.0
+
+			robot.PerTransactionFeeRate = dynamicPerTransactionFeeRate
+			replyText := "费率已更新 " + trimRate
+
+			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
+			reply.ParseMode = tgbotapi.ModeHTML
+			bot.Send(reply)
 		}
+
 	}
 }
