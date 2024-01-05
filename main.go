@@ -201,7 +201,7 @@ func main() {
 			robot.TransactionRate = dynamicTransactionRate
 			robot.PerTransactionFeeRate = (100 - dynamicTransactionRate) / 100
 
-			replyText := "请提供有效的费率值，例如：设置每笔交易费率 " + strconv.FormatFloat(robot.TransactionRate, 'f', 2, 64) + "%"
+			replyText := "已将每笔交易费率设置为" + strconv.FormatFloat(robot.TransactionRate, 'f', 2, 64) + "%"
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 			bot.Send(reply)
 
