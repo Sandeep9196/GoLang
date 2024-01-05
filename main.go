@@ -189,10 +189,10 @@ func main() {
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 			reply.ParseMode = tgbotapi.ModeHTML
 			bot.Send(reply)
-		} else if strings.HasPrefix(update.Message.Text, "设置每笔交易费率") {
+		} else if strings.HasPrefix(update.Message.Text, "设定费率") {
 			// Extract the fee rate value from the user input
 
-			transcationRate := strings.TrimPrefix(update.Message.Text, "设置每笔交易费率")
+			transcationRate := strings.TrimPrefix(update.Message.Text, "设定费率")
 			dynamicTransactionRate, err := strconv.ParseFloat(transcationRate, 64)
 			if err != nil {
 				log.Println("Error parsing dynamic exchange rate:", err)
