@@ -60,6 +60,7 @@ func main() {
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "今日账单已清除，可重新开始记录")
 			bot.Send(reply)
 		} else if strings.Contains(update.Message.Text, "设置汇率6.8") {
+			robot.ExchangeRate = 6.8
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "固定汇率设置成功， 当前固定汇率为6.8")
 			bot.Send(reply)
 		} else if strings.HasPrefix(update.Message.Text, "+") {
