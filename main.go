@@ -209,3 +209,5 @@ func main() {
 
 	}
 }
+
+//update all code here with latest calculated values
