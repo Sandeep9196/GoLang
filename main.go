@@ -86,6 +86,9 @@ func main() {
 				robot.DueAmount = 0
 				robot.DueAmountUsdt = 0
 
+				appendingString = ""
+				appendingPaymentString = ""
+
 			}
 			robot.TotalChineseAmount += float64(transactionAmount)
 			beforeDeductionUsdt := float64(transactionAmount) / robot.ExchangeRate
