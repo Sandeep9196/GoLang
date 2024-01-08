@@ -86,9 +86,6 @@ func main() {
 				robot.DueAmount = 0
 				robot.DueAmountUsdt = 0
 
-				appendingString = ""
-				appendingPaymentString = ""
-
 			}
 			robot.TotalChineseAmount += float64(transactionAmount)
 			beforeDeductionUsdt := float64(transactionAmount) / robot.ExchangeRate
@@ -118,7 +115,7 @@ func main() {
 			lineOfDashes := strings.Repeat("-", 50)
 
 			replyText := "<b>今日入款(" + strconv.Itoa(robot.TotalTransactions) + " 笔)</b>\n" + lineOfDashes + "\n" + appendingString + lineOfDashes + "\n<b>今日下发(" + strconv.Itoa(robot.TotalPayments) + " 笔)</b>\n" + lineOfDashes +
-				"\n<b>总入款:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
+				"\n " + appendingPaymentString + "\n<b>总入款:</b>" + strconv.FormatFloat(robot.TotalChineseAmount, 'f', 2, 64) + "\n" +
 				"<b>汇率:</b>" + strconv.FormatFloat(robot.ExchangeRate, 'f', 2, 64) + "\n<b>交易费率:</b>" + strconv.FormatFloat(robot.TransactionRate, 'f', 2, 64) + "%\n" + lineOfDashes + "\n" +
 				"<b>应下发:</b> " + strconv.FormatFloat(robot.TotalPaidAmount, 'f', 2, 64) + " | " +
 				strconv.FormatFloat(robot.TotalPaidAmountUsdt, 'f', 2, 64) + " U\n" +
