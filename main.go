@@ -53,7 +53,7 @@ func main() {
 		}
 
 		if strings.Contains(update.Message.Text, "开始") {
-			// Reset all settings to default values
+			// Reset all settings to default
 			robot.ExchangeRate = 6.8
 			robot.PerTransactionFeeRate = 0.97
 			robot.TransactionRate = 3
